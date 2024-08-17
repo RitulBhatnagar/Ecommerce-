@@ -33,6 +33,7 @@ model Product{
     description String
     price Int
     image String
+    published Boolean @default(false)
     cart CartItem[]
     createAt DateTime @default(now())
     updatedAt DateTime? @updatedAt
