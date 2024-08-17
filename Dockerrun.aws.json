@@ -1,0 +1,13 @@
+{
+  "AWSEBDockerrunVersion": "1",
+  "Image": {
+    "Name": "ecommerce",
+    "Update": "true"
+  },
+  "Ports": [
+    {
+      "ContainerPort": "6000"
+    }
+  ],
+  "Logging": "/var/log/nginx"
+}
