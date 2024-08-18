@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { HttpStatusCode } from "../middlewares/errorMiddleware";
+import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -16,6 +17,7 @@ interface DecodedToken {
   exp: number;
 }
 
+const prisma = new PrismaClient();
 const checkAuthToken = async (
   req: AuthenticatedRequest,
   res: Response,
@@ -35,22 +37,28 @@ const checkAuthToken = async (
       .status(HttpStatusCode.INTERNAL_SERVER_ERROR)
       .json({ message: "Internal server error" });
   }
-
-  console.log("Authorization header:", authHeader);
-
   const token = authHeader.split(" ")[1];
 
   try {
+    // find the token in the database
+    const tokenData = await prisma.token.findUnique({
+      where: {
+        token: token,
+      },
+    });
+    if (!tokenData) {
+      return res
+        .status(HttpStatusCode.UNAUTHORIZED)
+        .json({ message: "Please login or register" });
+    }
     const decodedToken = jwt.verify(token, JWT_SECRET) as DecodedToken;
-
-    console.log("Decoded token:", decodedToken);
 
     // Check if token has expired
     const currentTimestamp = Math.floor(Date.now() / 1000);
     if (decodedToken.exp < currentTimestamp) {
       return res
         .status(HttpStatusCode.UNAUTHORIZED)
-        .json({ message: "Unauthorized: Token has expired" });
+        .json({ message: "Please login again" });
     }
 
     req.body.user = { userId: decodedToken.id, role: decodedToken.role };

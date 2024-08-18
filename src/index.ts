@@ -2,6 +2,7 @@ import express from "express";
 import dotenv from "dotenv";
 import logger from "./utils/logger";
 import { Queue } from "bullmq";
+import cookieParser from "cookie-parser";
 dotenv.config();
 import userRoute from "./routes/user.routes";
 import productRoute from "./routes/product.routes";
@@ -11,6 +12,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(express.json());
+app.use(cookieParser());
 export const emailQueue = new Queue("email", {
   connection: redisOptions,
 });

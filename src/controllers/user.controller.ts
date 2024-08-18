@@ -90,12 +90,17 @@ export const loginUser = async (req: Request, res: Response) => {
 
   try {
     // Call the service function to login the user
-    const loginUser = await loginUserService(email, password, role);
+    const token = await loginUserService(email, password, role);
 
     // Return the response with the logged in user
+    res.cookie("accessToken", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    });
     return res.status(HttpStatusCode.OK).json({
-      message: "User logged in successfully",
-      accessToken: loginUser,
+      message: `Hello ${email} you are successfully logged in`,
     });
   } catch (error) {
     // Log the error if any
@@ -127,10 +132,17 @@ export const logoutUser = async (req: Request, res: Response) => {
   }
 
   try {
-    const logoutUser = await logoutUserService(userId);
+    await logoutUserService(userId);
+
+    // Clear the cookie with the same options used when setting it
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+
     return res.status(HttpStatusCode.OK).json({
       message: "User logged out successfully",
-      logout: logoutUser,
     });
   } catch (error) {
     logger.error("Error in logout of user", error);

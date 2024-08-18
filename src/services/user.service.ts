@@ -50,19 +50,6 @@ export const registerUserService = async (
     if (error instanceof APIError) {
       throw error;
     }
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      // Handle Prisma-specific errors
-      if (error.code === "P2002") {
-        throw new APIError(
-          ErrorCommonStrings.NOT_ALLOWED,
-          HttpStatusCode.NOT_ALLOWED,
-          true,
-          localConstant.USER_ALREADY_EXISIT
-        );
-      }
-    }
-
-    // Throw a new APIError with a generic internal server error message
     throw new APIError(
       ErrorCommonStrings.INTERNAL_SERVER_ERROR,
       HttpStatusCode.INTERNAL_ERROR,
