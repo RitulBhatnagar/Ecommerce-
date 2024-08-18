@@ -7,6 +7,7 @@ import {
   loginUserService,
   logoutUserService,
   registerUserService,
+  getUserService,
 } from "../services/user.service";
 import { Role } from "@prisma/client";
 
@@ -53,17 +54,11 @@ export const registerAdmin = async (req: Request, res: Response) => {
 
   try {
     // Call the service function to register the user
-    const registerUser = await registerUserService(
-      name,
-      email,
-      password,
-      Role.ADMIN
-    );
+    await registerUserService(name, email, password, Role.ADMIN);
 
     // Return the response with the created user
     return res.status(HttpStatusCode.CREATED).json({
       message: "Admin created successfully",
-      registerUser,
     });
   } catch (error) {
     // Log the error if any
@@ -93,14 +88,9 @@ export const loginUser = async (req: Request, res: Response) => {
     const token = await loginUserService(email, password, role);
 
     // Return the response with the logged in user
-    res.cookie("accessToken", token, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    });
     return res.status(HttpStatusCode.OK).json({
       message: `Hello ${email} you are successfully logged in`,
+      accessToken: token,
     });
   } catch (error) {
     // Log the error if any
@@ -121,6 +111,29 @@ export const loginUser = async (req: Request, res: Response) => {
     });
   }
 };
+export const getUser = async (req: Request, res: Response) => {
+  const { userId } = req.body.user;
+  try {
+    const user = await getUserService(userId);
+    return res.status(HttpStatusCode.OK).json({ user });
+  } catch (error) {
+    logger.error("Error in getting the user", error);
+
+    // If the error is an instance of APIError, return the appropriate error response
+    if (error instanceof APIError) {
+      return res
+        .status(error.httpCode || HttpStatusCode.INTERNAL_SERVER_ERROR)
+        .json({
+          message: error.message || localConstant.USER_NOT_FOUND,
+        });
+    }
+
+    // Return the internal server error response
+    return res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json({
+      message: localConstant.USER_NOT_FOUND,
+    });
+  }
+};
 
 export const logoutUser = async (req: Request, res: Response) => {
   const { userId } = req.body.user;
@@ -133,14 +146,7 @@ export const logoutUser = async (req: Request, res: Response) => {
 
   try {
     await logoutUserService(userId);
-
     // Clear the cookie with the same options used when setting it
-    res.clearCookie("accessToken", {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-    });
-
     return res.status(HttpStatusCode.OK).json({
       message: "User logged out successfully",
     });

@@ -3,7 +3,7 @@ import APIError, { HttpStatusCode } from "../middlewares/errorMiddleware";
 import { ErrorCommonStrings, localConstant } from "../utils/constant";
 import { AddToCartDto, CheckoutDto } from "../types/cart";
 import logger from "../utils/logger";
-import { emailQueue } from "../index";
+// import { emailQueue } from "../index";
 
 const prisma = new PrismaClient();
 export const createCartService = async (
@@ -140,14 +140,14 @@ export const checkoutCartService = async (
       },
     });
 
-    logger.info("Adding email to queue");
-    const job = await emailQueue.add("order-confirmation", {
-      to: "ritul.b@houseofweb3.com",
-      subject: "Order Confirmation",
-      body: `<h1>Your order has been confirmed. Shipping to: ${shippingAddress}</h1>`,
-    });
+    // logger.info("Adding email to queue");
+    // const job = await emailQueue.add("order-confirmation", {
+    //   to: "ritul.b@houseofweb3.com",
+    //   subject: "Order Confirmation",
+    //   body: `<h1>Your order has been confirmed. Shipping to: ${shippingAddress}</h1>`,
+    // });
 
-    logger.info(`Email job added to queue with id: ${job.id}`);
+    // logger.info(`Email job added to queue with id: ${job.id}`);
 
     return { success: true, message: "Checkout successful" };
   } catch (error) {

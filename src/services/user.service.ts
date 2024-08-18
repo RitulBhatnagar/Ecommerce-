@@ -179,3 +179,39 @@ export const logoutUserService = async (userId: string) => {
     );
   }
 };
+
+export const getUserService = async (userId: string) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+    });
+    if (!user) {
+      throw new APIError(
+        ErrorCommonStrings.NOT_FOUND,
+        HttpStatusCode.NOT_FOUND,
+        true,
+        localConstant.USER_NOT_FOUND
+      );
+    }
+    return user;
+    // logger.info("User fetched successfully", user);
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw error;
+    }
+    throw new APIError(
+      ErrorCommonStrings.INTERNAL_SERVER_ERROR,
+      HttpStatusCode.INTERNAL_ERROR,
+      false,
+      localConstant.INTERNAL_SERVER_ERROR
+    );
+  }
+};
