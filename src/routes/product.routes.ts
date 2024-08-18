@@ -1,6 +1,9 @@
 import { Router } from "express";
 import checkAuthToken from "../middlewares/authenticate";
-import { roleIdentifier } from "../middlewares/roleIdentifier";
+import {
+  roleIdentifierAdmin,
+  roleIdentifierUser,
+} from "../middlewares/roleIdentifier";
 import {
   changeProductStatus,
   createProduct,
@@ -11,13 +14,28 @@ import {
 
 const router = Router();
 
-router.post("/product/create", checkAuthToken, roleIdentifier, createProduct);
+router.post(
+  "/product/create",
+  checkAuthToken,
+  roleIdentifierAdmin,
+  createProduct
+);
 
 router.get("/products", getProducts);
 
 router.get("/product/:id", getProductById);
 
-router.delete("/product", checkAuthToken, roleIdentifier, deleteProduct);
+router.delete(
+  "/product/:id",
+  checkAuthToken,
+  roleIdentifierAdmin,
+  deleteProduct
+);
 
-router.put("/product", checkAuthToken, roleIdentifier, changeProductStatus);
+router.put(
+  "/product/:id",
+  checkAuthToken,
+  roleIdentifierAdmin,
+  changeProductStatus
+);
 export default router;

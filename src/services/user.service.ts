@@ -14,6 +14,21 @@ export const registerUserService = async (
   role: Role
 ): Promise<User> => {
   try {
+    // check if user is not registered for the same role and email twice
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        email: email,
+        role: role,
+      },
+    });
+    if (existingUser) {
+      throw new APIError(
+        ErrorCommonStrings.NOT_ALLOWED,
+        HttpStatusCode.NOT_ALLOWED,
+        false,
+        "You are not allowed to registered for the same role again"
+      );
+    }
     // Hash the password using bcrypt
     const hashedPassword = await argon2.hash(password);
 
@@ -57,12 +72,17 @@ export const registerUserService = async (
   }
 };
 
-export const loginUserService = async (email: string, password: string) => {
+export const loginUserService = async (
+  email: string,
+  password: string,
+  role: Role
+) => {
   try {
     // Find the user in the database
-    const user = await prisma.user.findUnique({
+    const user = await prisma.user.findFirst({
       where: {
         email: email,
+        role: role,
       },
     });
 

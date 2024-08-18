@@ -16,7 +16,7 @@ export const createCart = async (req: Request, res: Response) => {
   try {
     const addToCart = await createCartService(userId, addToCartDto);
     return res.status(HttpStatusCode.CREATED).json({
-      message: "Cart created successfully",
+      message: "Item added successfully",
       cart: addToCart,
     });
   } catch (error) {

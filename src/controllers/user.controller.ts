@@ -86,11 +86,11 @@ export const registerAdmin = async (req: Request, res: Response) => {
 };
 
 export const loginUser = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password, role } = req.body;
 
   try {
     // Call the service function to login the user
-    const loginUser = await loginUserService(email, password);
+    const loginUser = await loginUserService(email, password, role);
 
     // Return the response with the logged in user
     return res.status(HttpStatusCode.OK).json({
