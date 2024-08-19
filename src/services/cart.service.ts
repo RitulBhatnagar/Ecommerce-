@@ -3,6 +3,7 @@ import APIError, { HttpStatusCode } from "../middlewares/errorMiddleware";
 import { ErrorCommonStrings, localConstant } from "../utils/constant";
 import { AddToCartDto, CheckoutDto } from "../types/cart";
 import logger from "../utils/logger";
+import { sendMail } from "./email.service";
 // import { emailQueue } from "../index";
 
 const prisma = new PrismaClient();
@@ -139,16 +140,13 @@ export const checkoutCartService = async (
         id: cart.id,
       },
     });
-
-    // logger.info("Adding email to queue");
-    // const job = await emailQueue.add("order-confirmation", {
-    //   to: "ritul.b@houseofweb3.com",
-    //   subject: "Order Confirmation",
-    //   body: `<h1>Your order has been confirmed. Shipping to: ${shippingAddress}</h1>`,
-    // });
-
-    // logger.info(`Email job added to queue with id: ${job.id}`);
-
+    console.log(user.email);
+    logger.info("Sending mail to the user", user.email);
+    await sendMail(
+      user.email,
+      "Order Confirmation",
+      "Your order has been confirmed"
+    );
     return { success: true, message: "Checkout successful" };
   } catch (error) {
     if (error instanceof APIError) {
