@@ -89,7 +89,21 @@ export const getProductByIdService = async (id: string) => {
 
 export const deleteProductService = async (id: string) => {
   try {
-    const product = await prisma.product.delete({
+    let product;
+    product = await prisma.product.findUnique({
+      where: {
+        id: id,
+      },
+    });
+    if (!product) {
+      throw new APIError(
+        ErrorCommonStrings.NOT_FOUND,
+        HttpStatusCode.NOT_FOUND,
+        false,
+        localConstant.PRODUCT_NOT_FOUND
+      );
+    }
+    product = await prisma.product.delete({
       where: {
         id: id,
       },
@@ -110,7 +124,22 @@ export const changeProductStatusService = async (
   published: boolean
 ) => {
   try {
-    const product = await prisma.product.update({
+    let product;
+    product = await prisma.product.findUnique({
+      where: {
+        id: id,
+      },
+    });
+
+    if (!product) {
+      throw new APIError(
+        ErrorCommonStrings.NOT_FOUND,
+        HttpStatusCode.NOT_FOUND,
+        false,
+        localConstant.PRODUCT_NOT_FOUND
+      );
+    }
+    product = await prisma.product.update({
       where: {
         id: id,
       },
@@ -120,6 +149,9 @@ export const changeProductStatusService = async (
     });
     return product;
   } catch (error) {
+    if (error instanceof APIError) {
+      throw error;
+    }
     throw new APIError(
       ErrorCommonStrings.INTERNAL_SERVER_ERROR,
       HttpStatusCode.INTERNAL_ERROR,
